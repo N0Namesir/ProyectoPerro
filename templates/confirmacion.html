@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Adopción</title>
+</head>
+<body>
+    <h1>Estás a punto de adoptar a {{ dog.name }}</h1>
+    <p>{{ dog.name }} es un {{ dog.breed }} de {{ dog.age }} años.</p>
+    
+    <h3>Tus Datos (Adoptante):</h3>
+    <form action="/confirmar_adopcion" method="POST">
+        <input type="hidden" name="dog_id" value="{{ dog.id }}">
+        
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="lastname">Apellido:</label>
+        <input type="text" id="lastname" name="lastname" required><br><br>
+        
+        <label for="id_card">Cédula/ID (String en el diagrama):</label>
+        <input type="text" id="id_card" name="id_card" required><br><br>
+        
+        <label for="address">Dirección (Detalle de Adopter):</label>
+        <input type="text" id="address" name="address" required><br><br>
+        
+        <input type="submit" value="Confirmar Adopción">
+    </form>
+</body>
+</html>

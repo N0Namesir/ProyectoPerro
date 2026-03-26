@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centro de Adopción de Perritos</title>
+    <style>
+        .dog-card { border: 1px solid #ccc; padding: 20px; margin: 10px; width: 200px; text-align: center; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Perritos en Catálogo</h1>
+    <div class="container">
+        {% for dog in dogs %}
+        <div class="dog-card">
+            <h2>{{ dog.name }}</h2>
+            <p><strong>Edad:</strong> {{ dog.age }} años</p>
+            <p><strong>Raza:</strong> {{ dog.breed }}</p>
+            <a href="/adoptar/{{ dog.id }}">¡Adoptame!</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
