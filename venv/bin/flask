@@ -1,4 +1,4 @@
-#!/home/over/Escritorio/ProyectoPerro/venv/bin/python3
+#!/home/over/ProyectoPerro/venv/bin/python
 import sys
 from flask.cli import main
 if __name__ == '__main__':

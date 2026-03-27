@@ -4,20 +4,8 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: password_maestra
-      MARIADB_DATABASE: proyectoperro
+      MARIADB_DATABASE: CentroAdopcion
       MARIADB_USER: user_perro
       MARIADB_PASSWORD: password123
     ports:
       - "3306:3306"
-
-  app:
-    build: .
-    ports:
-      - "5000:5000"
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_USER: user_perro
-      DB_PASS: password123
-      DB_NAME: proyectoperro

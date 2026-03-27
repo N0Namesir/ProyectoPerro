@@ -5,7 +5,7 @@ import mariadb
 # En Docker, las variables se inyectan desde docker-compose.yml.
 # En local, se usan los valores de fallback (modifícalos según tu instalación).
 DB_CONFIG = {
-    "host":     os.environ.get("DB_HOST", "localhost"),
+    "host":     os.environ.get("DB_HOST", "127.0.0.1"),
     "port":     int(os.environ.get("DB_PORT", 3306)),
     "user":     os.environ.get("DB_USER", "user_perro"),
     "password": os.environ.get("DB_PASS", "password123"),
