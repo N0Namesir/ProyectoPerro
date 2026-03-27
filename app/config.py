@@ -1,12 +1,15 @@
+import os
 import mariadb
 
-# Configuración de conexión. Cámbialo por tus credenciales.
+# Lee desde variables de entorno; si no existen, usa valores locales por defecto.
+# En Docker, las variables se inyectan desde docker-compose.yml.
+# En local, se usan los valores de fallback (modifícalos según tu instalación).
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "tu_usuario_mariadb",
-    "password": "tu_contraseña_mariadb",
-    "database": "CentroAdopcion"
+    "host":     os.environ.get("DB_HOST", "localhost"),
+    "port":     int(os.environ.get("DB_PORT", 3306)),
+    "user":     os.environ.get("DB_USER", "user_perro"),
+    "password": os.environ.get("DB_PASS", "password123"),
+    "database": os.environ.get("DB_NAME", "CentroAdopcion")
 }
 
 def get_db_connection():
@@ -14,5 +17,7 @@ def get_db_connection():
         conn = mariadb.connect(**DB_CONFIG)
         return conn
     except mariadb.Error as e:
-        print(f"Error conectando a MariaDB: {e}")
+        print(f"[ERROR] No se pudo conectar a MariaDB: {e}")
+        print(f"[INFO]  Configuración usada: host={DB_CONFIG['host']} "
+              f"user={DB_CONFIG['user']} db={DB_CONFIG['database']}")
         return None
