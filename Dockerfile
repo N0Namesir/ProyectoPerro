@@ -1,17 +1,20 @@
-    # Usamos una imagen base con herramientas de compilación
-FROM gcc:latest
+# Usamos una imagen ligera de Python
+FROM python:3.10-slim
 
-# Instalamos CMake y la librería de desarrollo de PostgreSQL
-RUN apt-get update && apt-get install -y cmake libpq-dev libpqxx-dev
+# Instalamos dependencias del sistema para que Python hable con PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Directorio de trabajo dentro del contenedor
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copiamos los archivos del proyecto al contenedor
+# Copiamos el archivo de librerías (si no tienes requirements.txt, mira el paso abajo)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiamos el resto del código
 COPY . .
 
-# Creamos la carpeta de build y compilamos
-RUN mkdir build && cd build && cmake .. && make
-
-# Comando para ejecutar la app (ajusta 'ProyectoPerro' al nombre de tu ejecutable)
-CMD ["./build/ProyectoPerro"]
+# Ejecutamos el archivo principal de tu app
+CMD ["python", "main.py"]

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
@@ -13,12 +11,9 @@ services:
 
   app:
     build: .
+    ports:
+      - "5000:5000"
     depends_on:
       - db
     environment:
-      # Estos datos deben coincidir con los de arriba para la conexión
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: user_perro
-      DB_PASS: password123
-      DB_NAME: proyectoperro
+      DATABASE_URL: "postgresql://user_perro:password123@db:5432/proyectoperro"
