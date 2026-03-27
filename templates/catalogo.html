@@ -1,83 +1,121 @@
 {% extends "layout.html" %}
-{% from "/components/macros.html" import card_animal, page_header, alert_box %}
+{% from "components/macros.html" import card_perro %}
 
-{% block title %}Catálogo de Perritos — AdoptaPets{% endblock %}
+{% block title %}Perritos en adopción — AdoptaPets{% endblock %}
 
 {% block extra_styles %}
-/* Estilos específicos del catálogo */
-.catalogo-grid {
-  padding-bottom: 3rem;
+/* ── Hero de sección ──────────────────────────────────────── */
+.catalog-hero {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-soft) 100%);
+  border-bottom: 2px solid var(--border-color);
+  padding: 3.5rem 0 2.5rem;
+  margin-bottom: 2.5rem;
 }
+.catalog-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--accent-deeper);
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+.catalog-hero__subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 480px;
+}
+
+/* ── Contador ────────────────────────────────────────────── */
+.result-count {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  background: var(--accent-soft);
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Grid ────────────────────────────────────────────────── */
+.catalog-grid {
+  padding-bottom: 4rem;
+}
+
+/* ── Estado vacío ────────────────────────────────────────── */
 .empty-state {
   background: var(--surface);
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-card);
-  padding: 4rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
 }
 .empty-state__emoji {
   font-size: 4rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+}
+.empty-state__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--accent-deeper);
+  margin-bottom: 0.5rem;
 }
 {% endblock %}
 
-
 {% block content %}
 
-{# ── Cabecera de sección ─────────────────────────────────────── #}
-{{ page_header(
-  titulo   = "Perritos en adopción",
-  subtitulo = "Cada uno espera a alguien como tú. Encuentra a tu compañero ideal.",
-  icon     = "heart"
-) }}
+<!-- ── Hero de sección ───────────────────────────────────────── -->
+<section class="catalog-hero">
+  <div class="container">
+    <h1 class="catalog-hero__title">
+      <i class="bi bi-heart-fill me-2" style="color: var(--accent);"></i>
+      Perritos en adopción
+    </h1>
+    <p class="catalog-hero__subtitle">
+      Cada uno espera a alguien como tú. Encuentra a tu compañero ideal y dale el hogar que merece.
+    </p>
+  </div>
+</section>
 
-<div class="container catalogo-grid">
+<!-- ── Contenido principal ──────────────────────────────────── -->
+<div class="container catalog-grid">
 
   {% if dogs %}
 
-    {# ── Contador de resultados ──────────────────────────────── #}
-    <div class="d-flex align-items-center justify-content-between mb-4">
-      <p class="mb-0 text-muted-custom">
-        <i class="bi bi-grid-3x3-gap me-1"></i>
+    <!-- Contador de resultados -->
+    <div class="mb-4">
+      <span class="result-count">
+        <i class="bi bi-grid-3x3-gap"></i>
         <strong>{{ dogs|length }}</strong>
         perrit{% if dogs|length == 1 %}o disponible{% else %}os disponibles{% endif %}
-      </p>
-      <a href="{{ url_for('admin') }}" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-plus-circle me-1"></i>Agregar perrito
-      </a>
+      </span>
     </div>
 
-    {# ── Grid de cards (col-md-4 → 3 por fila en desktop) ───── #}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+    <!-- Grid de cards -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
       {% for perro in dogs %}
-        {{ card_animal(perro) }}
+        {{ card_perro(perro) }}
       {% endfor %}
     </div>
 
   {% else %}
 
-    {# ── Estado vacío ────────────────────────────────────────── #}
-    {{ alert_box(
-      '¡Todos los perritos ya tienen hogar! Vuelve pronto para conocer a los nuevos.',
-      tipo='success',
-      dismissible=False
-    ) }}
-
+    <!-- Estado vacío -->
     <div class="empty-state">
       <span class="empty-state__emoji">🏠</span>
-      <h3 style="font-family: var(--font-display); color: var(--accent-dark);">
-        Catálogo vacío por ahora
-      </h3>
-      <p class="text-muted-custom mt-2 mb-4">
-        Todos los perritos han encontrado su hogar. ¡Qué maravilloso!
+      <h3 class="empty-state__title">Catálogo vacío por ahora</h3>
+      <p class="text-muted-custom mt-2 mb-0">
+        Todos los perritos han encontrado su hogar. ¡Qué maravilloso!<br>
+        Vuelve pronto para conocer a los nuevos amigos.
       </p>
-      <a href="{{ url_for('admin') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-2"></i>Agregar nuevos perritos
-      </a>
     </div>
 
   {% endif %}
 
-</div><!-- /.container -->
+</div>
 {% endblock %}
