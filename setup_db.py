@@ -25,13 +25,7 @@ SQL_STATEMENTS = [
         email      VARCHAR(100)
     )
     """,
-    """
-    CREATE TABLE IF NOT EXISTS Adopter (
-        person_id INT PRIMARY KEY,
-        address   VARCHAR(200),
-        FOREIGN KEY (person_id) REFERENCES Person(id)
-    )
-    """,
+    # FIX: se agregó dog_id (con FK a Dog) que faltaba en la definición original
     """
     CREATE TABLE IF NOT EXISTS Dog (
         id      INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +33,15 @@ SQL_STATEMENTS = [
         age     INT,
         adopted BOOLEAN DEFAULT FALSE,
         breed   VARCHAR(50)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS Adopter (
+        person_id INT PRIMARY KEY,
+        address   VARCHAR(200),
+        dog_id    INT NOT NULL,
+        FOREIGN KEY (person_id) REFERENCES Person(id),
+        FOREIGN KEY (dog_id) REFERENCES Dog(id)
     )
     """,
     # Solo inserta los perros si la tabla estaba vacía

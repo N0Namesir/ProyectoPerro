@@ -17,7 +17,6 @@ services:
     depends_on:
       - db
     environment:
-      # El host sigue siendo "db" (el nombre del servicio arriba)
       DB_HOST: db
       DB_USER: user_perro
       DB_PASS: password123

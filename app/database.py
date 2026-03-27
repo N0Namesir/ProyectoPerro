@@ -70,20 +70,16 @@ def register_adoption_transactional(dog_id, adopter_name, adopter_lastname, addr
         )
         person_id = cur.lastrowid
 
+        # FIX: se eliminó el INSERT duplicado que causaba error de llave primaria
         cur.execute(
-           "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
+            "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
             (person_id, address, dog_id)
-)
+        )
 
         cur.execute(
             "UPDATE Dog SET adopted = TRUE WHERE id = ?",
             (dog_id,)
         )
-
-        cur.execute(
-            "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
-            (person_id, address, dog_id)
-)
 
         conn.commit()
         return True
@@ -122,7 +118,6 @@ def delete_dog(dog_id):
     if not conn: return False
     cur = conn.cursor()
     try:
-        # Verificar que no esté adoptado antes de eliminar
         cur.execute("SELECT adopted FROM Dog WHERE id = ?", (dog_id,))
         row = cur.fetchone()
         if not row or row[0]:
