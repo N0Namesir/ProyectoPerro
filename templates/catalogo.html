@@ -1,32 +1,83 @@
-{% extends "base.html" %}
-{% block title %}Catálogo de Perritos{% endblock %}
+{% extends "layout.html" %}
+{% from "/components/macros.html" import card_animal, page_header, alert_box %}
+
+{% block title %}Catálogo de Perritos — AdoptaPets{% endblock %}
+
+{% block extra_styles %}
+/* Estilos específicos del catálogo */
+.catalogo-grid {
+  padding-bottom: 3rem;
+}
+.empty-state {
+  background: var(--surface);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-card);
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.empty-state__emoji {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+{% endblock %}
+
 
 {% block content %}
-<h1>Perritos en adopción</h1>
-<h2>Encuentra a tu compañero ideal</h2>
 
-{% if dogs %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 32px;">
-    {% for dog in dogs %}
-    <div class="card" style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 3rem; text-align: center; padding: 16px 0; background: var(--bg); border-radius: 6px;">🐶</div>
-        <div>
-            <div style="font-size: 1.3rem; font-weight: bold;">{{ dog.name }}</div>
-            <div style="color: var(--muted); font-family: monospace; font-size: 0.85rem; margin-top: 4px;">{{ dog.breed }}</div>
-        </div>
-        <div style="font-family: monospace; font-size: 0.85rem; color: var(--muted);">
-            {{ dog.age }} año{% if dog.age != 1 %}s{% endif %}
-        </div>
-        <a href="/adoptar/{{ dog.id }}" class="btn btn-primary" style="text-align: center; margin-top: auto;">
-            Adoptar a {{ dog.name }}
-        </a>
+{# ── Cabecera de sección ─────────────────────────────────────── #}
+{{ page_header(
+  titulo   = "Perritos en adopción",
+  subtitulo = "Cada uno espera a alguien como tú. Encuentra a tu compañero ideal.",
+  icon     = "heart"
+) }}
+
+<div class="container catalogo-grid">
+
+  {% if dogs %}
+
+    {# ── Contador de resultados ──────────────────────────────── #}
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <p class="mb-0 text-muted-custom">
+        <i class="bi bi-grid-3x3-gap me-1"></i>
+        <strong>{{ dogs|length }}</strong>
+        perrit{% if dogs|length == 1 %}o disponible{% else %}os disponibles{% endif %}
+      </p>
+      <a href="{{ url_for('admin') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i>Agregar perrito
+      </a>
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="card" style="text-align: center; padding: 60px; margin-top: 32px;">
-    <div style="font-size: 3rem; margin-bottom: 16px;">🏠</div>
-    <p style="color: var(--muted);">Todos los perritos han encontrado hogar. ¡Vuelve pronto!</p>
-</div>
-{% endif %}
+
+    {# ── Grid de cards (col-md-4 → 3 por fila en desktop) ───── #}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+      {% for perro in dogs %}
+        {{ card_animal(perro) }}
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    {# ── Estado vacío ────────────────────────────────────────── #}
+    {{ alert_box(
+      '¡Todos los perritos ya tienen hogar! Vuelve pronto para conocer a los nuevos.',
+      tipo='success',
+      dismissible=False
+    ) }}
+
+    <div class="empty-state">
+      <span class="empty-state__emoji">🏠</span>
+      <h3 style="font-family: var(--font-display); color: var(--accent-dark);">
+        Catálogo vacío por ahora
+      </h3>
+      <p class="text-muted-custom mt-2 mb-4">
+        Todos los perritos han encontrado su hogar. ¡Qué maravilloso!
+      </p>
+      <a href="{{ url_for('admin') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Agregar nuevos perritos
+      </a>
+    </div>
+
+  {% endif %}
+
+</div><!-- /.container -->
 {% endblock %}
