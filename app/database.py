@@ -33,7 +33,6 @@ def get_dog_by_id(dog_id):
     return dog
 
 def get_all_adoptions():
-    """Retorna el historial de adopciones con datos del adoptante y el perro."""
     conn = config.get_db_connection()
     if not conn: return []
     cur = conn.cursor()
@@ -41,7 +40,7 @@ def get_all_adoptions():
         SELECT p.name, p.lastName, p.id_card, a.address, d.name, d.breed
         FROM Person p
         JOIN Adopter a ON p.id = a.person_id
-        JOIN Dog d ON d.adopted = TRUE
+        JOIN Dog d ON d.id = a.dog_id
         ORDER BY p.id DESC
     """)
     adoptions = cur.fetchall()
@@ -72,14 +71,19 @@ def register_adoption_transactional(dog_id, adopter_name, adopter_lastname, addr
         person_id = cur.lastrowid
 
         cur.execute(
-            "INSERT INTO Adopter (person_id, address) VALUES (?, ?)",
-            (person_id, address)
-        )
+           "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
+            (person_id, address, dog_id)
+)
 
         cur.execute(
             "UPDATE Dog SET adopted = TRUE WHERE id = ?",
             (dog_id,)
         )
+
+        cur.execute(
+            "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
+            (person_id, address, dog_id)
+)
 
         conn.commit()
         return True

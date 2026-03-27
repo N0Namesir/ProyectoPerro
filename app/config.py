@@ -9,7 +9,7 @@ DB_CONFIG = {
     "port":     int(os.environ.get("DB_PORT", 3306)),
     "user":     os.environ.get("DB_USER", "user_perro"),
     "password": os.environ.get("DB_PASS", "password123"),
-    "database": os.environ.get("DB_NAME", "proyectoperro")
+    "database": os.environ.get("DB_NAME", "CentroAdopcion")
 }
 
 def get_db_connection():
