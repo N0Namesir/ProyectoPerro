@@ -1,121 +1,89 @@
-{% extends "layout.html" %}
-{% from "components/macros.html" import card_perro %}
-
-{% block title %}Perritos en adopción — AdoptaPets{% endblock %}
-
-{% block extra_styles %}
-/* ── Hero de sección ──────────────────────────────────────── */
-.catalog-hero {
-  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-soft) 100%);
-  border-bottom: 2px solid var(--border-color);
-  padding: 3.5rem 0 2.5rem;
-  margin-bottom: 2.5rem;
-}
-.catalog-hero__title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 900;
-  color: var(--accent-deeper);
-  line-height: 1.15;
-  margin-bottom: 0.5rem;
-}
-.catalog-hero__subtitle {
-  font-size: 1.05rem;
-  color: var(--text-muted);
-  max-width: 480px;
-}
-
-/* ── Contador ────────────────────────────────────────────── */
-.result-count {
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  padding: 6px 14px;
-  background: var(--accent-soft);
-  border-radius: 20px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* ── Grid ────────────────────────────────────────────────── */
-.catalog-grid {
-  padding-bottom: 4rem;
-}
-
-/* ── Estado vacío ────────────────────────────────────────── */
-.empty-state {
-  background: var(--surface);
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-card);
-  padding: 5rem 2rem;
-  text-align: center;
-  max-width: 520px;
-  margin: 0 auto;
-}
-.empty-state__emoji {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 1.25rem;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
-}
-.empty-state__title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  color: var(--accent-deeper);
-  margin-bottom: 0.5rem;
-}
-{% endblock %}
+{% extends "base.html" %}
+{% block title %}Perritos en adopción — Centro de Adopción{% endblock %}
 
 {% block content %}
-
-<!-- ── Hero de sección ───────────────────────────────────────── -->
-<section class="catalog-hero">
-  <div class="container">
-    <h1 class="catalog-hero__title">
-      <i class="bi bi-heart-fill me-2" style="color: var(--accent);"></i>
-      Perritos en adopción
-    </h1>
-    <p class="catalog-hero__subtitle">
-      Cada uno espera a alguien como tú. Encuentra a tu compañero ideal y dale el hogar que merece.
-    </p>
-  </div>
-</section>
-
-<!-- ── Contenido principal ──────────────────────────────────── -->
-<div class="container catalog-grid">
-
-  {% if dogs %}
-
-    <!-- Contador de resultados -->
-    <div class="mb-4">
-      <span class="result-count">
-        <i class="bi bi-grid-3x3-gap"></i>
-        <strong>{{ dogs|length }}</strong>
-        perrit{% if dogs|length == 1 %}o disponible{% else %}os disponibles{% endif %}
-      </span>
-    </div>
-
-    <!-- Grid de cards -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
-      {% for perro in dogs %}
-        {{ card_perro(perro) }}
-      {% endfor %}
-    </div>
-
-  {% else %}
-
-    <!-- Estado vacío -->
-    <div class="empty-state">
-      <span class="empty-state__emoji">🏠</span>
-      <h3 class="empty-state__title">Catálogo vacío por ahora</h3>
-      <p class="text-muted-custom mt-2 mb-0">
-        Todos los perritos han encontrado su hogar. ¡Qué maravilloso!<br>
-        Vuelve pronto para conocer a los nuevos amigos.
-      </p>
-    </div>
-
-  {% endif %}
-
+<div style="margin-bottom: 32px;">
+    <h1>Perritos disponibles</h1>
+    <h2>Cada uno espera a alguien como tú</h2>
 </div>
+
+{% if dogs %}
+
+<div style="
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 8px;
+">
+    {% for dog in dogs %}
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+
+        <!-- Foto o placeholder -->
+        <div style="
+            height: 200px;
+            background: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        ">
+            {% if dog.photo_url %}
+            <img
+                src="{{ dog.photo_url }}"
+                alt="Foto de {{ dog.name }}"
+                style="width: 100%; height: 100%; object-fit: cover;"
+            >
+            {% else %}
+            <span style="font-size: 5rem; line-height: 1; user-select: none;">🐶</span>
+            {% endif %}
+
+            <!-- Badge raza -->
+            <span style="
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background: rgba(255,255,255,0.92);
+                border-radius: 20px;
+                padding: 3px 10px;
+                font-family: monospace;
+                font-size: 0.75rem;
+                color: var(--muted);
+                backdrop-filter: blur(4px);
+            ">{{ dog.breed }}</span>
+        </div>
+
+        <!-- Info -->
+        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <div style="font-size: 1.2rem; font-weight: bold;">{{ dog.name }}</div>
+                <div style="font-family: monospace; font-size: 0.82rem; color: var(--muted); margin-top: 2px;">
+                    {{ dog.age }} año{% if dog.age != 1 %}s{% endif %}
+                </div>
+            </div>
+
+            <a
+                href="/adoptar/{{ dog.id }}"
+                class="btn btn-primary"
+                style="margin-top: auto; text-align: center;"
+            >
+                Adoptar a {{ dog.name }}
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+
+<div class="card" style="text-align: center; padding: 64px 40px; max-width: 480px; margin: 60px auto;">
+    <div style="font-size: 4rem; margin-bottom: 20px;">🏠</div>
+    <h1 style="font-size: 1.4rem; margin-bottom: 10px;">Todos tienen hogar</h1>
+    <p style="color: var(--muted); margin-bottom: 28px;">
+        ¡Todos los perritos han sido adoptados! Vuelve pronto para conocer a los nuevos.
+    </p>
+    <a href="/admin" class="btn btn-secondary">Ir al panel de administración</a>
+</div>
+
+{% endif %}
 {% endblock %}

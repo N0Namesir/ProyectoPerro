@@ -1,10 +1,8 @@
 """
 setup_db.py — Inicializa la base de datos con las tablas y datos de prueba.
-Ejecutar UNA sola vez antes de arrancar la app:
+Ejecutar para reiniciar la base de datos y aplicar cambios en la estructura:
 
     python setup_db.py
-
-Si las tablas ya existen, no las sobreescribe (IF NOT EXISTS).
 """
 import sys
 import os
@@ -13,8 +11,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
 import config
 
 SQL_STATEMENTS = [
+    # --- 1. ELIMINAR TABLAS ANTIGUAS (Orden inverso a la creación por las FK) ---
+    "DROP TABLE IF EXISTS Adopter;",
+    "DROP TABLE IF EXISTS Dog;",
+    "DROP TABLE IF EXISTS Person;",
+
+    # --- 2. CREAR TABLAS NUEVAS ---
     """
-    CREATE TABLE IF NOT EXISTS Person (
+    CREATE TABLE Person (
         id         INT AUTO_INCREMENT PRIMARY KEY,
         name       VARCHAR(100),
         lastName   VARCHAR(100),
@@ -25,18 +29,19 @@ SQL_STATEMENTS = [
         email      VARCHAR(100)
     )
     """,
-    # FIX: se agregó dog_id (con FK a Dog) que faltaba en la definición original
     """
-    CREATE TABLE IF NOT EXISTS Dog (
+    CREATE TABLE Dog (
         id      INT AUTO_INCREMENT PRIMARY KEY,
         name    VARCHAR(50),
         age     INT,
         adopted BOOLEAN DEFAULT FALSE,
-        breed   VARCHAR(50)
+        breed   VARCHAR(50),
+        photo   VARCHAR(255)
     )
     """,
+    # FIX: se agregó dog_id (con FK a Dog) que faltaba en la definición original
     """
-    CREATE TABLE IF NOT EXISTS Adopter (
+    CREATE TABLE Adopter (
         person_id INT PRIMARY KEY,
         address   VARCHAR(200),
         dog_id    INT NOT NULL,
@@ -44,7 +49,8 @@ SQL_STATEMENTS = [
         FOREIGN KEY (dog_id) REFERENCES Dog(id)
     )
     """,
-    # Solo inserta los perros si la tabla estaba vacía
+    
+    # --- 3. INSERTAR DATOS DE PRUEBA ---
     """
     INSERT IGNORE INTO Dog (id, name, age, breed) VALUES
         (1, 'Firulais', 3, 'Labrador'),
@@ -64,11 +70,11 @@ def run():
         try:
             cur.execute(sql)
         except Exception as e:
-            print(f"[WARN] {e}")
+            print(f"[WARN] Error ejecutando sentencia: {e}")
 
     conn.commit()
     conn.close()
-    print("[OK] Base de datos inicializada correctamente.")
+    print("[OK] Base de datos reiniciada e inicializada correctamente.")
 
 if __name__ == '__main__':
     run()
