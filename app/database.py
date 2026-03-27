@@ -7,7 +7,7 @@ def get_available_dogs():
     conn = config.get_db_connection()
     if not conn: return []
     cur = conn.cursor()
-    cur.execute("SELECT id, name, age, breed FROM Dog WHERE adopted = FALSE")
+    cur.execute("SELECT id, name, age, breed, photo FROM Dog WHERE adopted = FALSE")
     dogs = cur.fetchall()
     conn.close()
     return dogs
@@ -17,7 +17,7 @@ def get_all_dogs():
     conn = config.get_db_connection()
     if not conn: return []
     cur = conn.cursor()
-    cur.execute("SELECT id, name, age, breed, adopted FROM Dog ORDER BY id DESC")
+    cur.execute("SELECT id, name, age, breed, adopted, photo FROM Dog ORDER BY id DESC")
     dogs = cur.fetchall()
     conn.close()
     return dogs
@@ -27,7 +27,7 @@ def get_dog_by_id(dog_id):
     conn = config.get_db_connection()
     if not conn: return None
     cur = conn.cursor()
-    cur.execute("SELECT id, name, age, breed, adopted FROM Dog WHERE id = ?", (dog_id,))
+    cur.execute("SELECT id, name, age, breed, adopted, photo FROM Dog WHERE id = ?", (dog_id,))
     dog = cur.fetchone()
     conn.close()
     return dog
@@ -70,7 +70,6 @@ def register_adoption_transactional(dog_id, adopter_name, adopter_lastname, addr
         )
         person_id = cur.lastrowid
 
-        # FIX: se eliminó el INSERT duplicado que causaba error de llave primaria
         cur.execute(
             "INSERT INTO Adopter (person_id, address, dog_id) VALUES (?, ?, ?)",
             (person_id, address, dog_id)
@@ -128,6 +127,27 @@ def delete_dog(dog_id):
         return True
     except Exception as e:
         print(f"[ERROR] No se pudo eliminar el perro: {e}")
+        return False
+    finally:
+        conn.close()
+
+def update_dog_photo(dog_id, filename):
+    """
+    Actualiza el campo photo de un perro.
+    Pasa filename=None para borrar la foto.
+    """
+    conn = config.get_db_connection()
+    if not conn: return False
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "UPDATE Dog SET photo = ? WHERE id = ?",
+            (filename, dog_id)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"[ERROR] No se pudo actualizar la foto del perro: {e}")
         return False
     finally:
         conn.close()

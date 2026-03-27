@@ -1,2 +1,15 @@
-pyvenv.cfg
-app/_pycache_
+# Fotos subidas por los administradores — no versionar
+static/uploads/dogs/*.jpg
+static/uploads/dogs/*.jpeg
+static/uploads/dogs/*.png
+static/uploads/dogs/*.webp
+static/uploads/dogs/*.gif
+
+# Entorno virtual
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
