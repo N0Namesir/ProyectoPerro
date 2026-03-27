@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: user_perro
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: proyectoperro
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      # Estos datos deben coincidir con los de arriba para la conexión
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: user_perro
+      DB_PASS: password123
+      DB_NAME: proyectoperro
