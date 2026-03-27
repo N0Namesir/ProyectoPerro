@@ -1,13 +1,14 @@
 services:
   db:
-    image: postgres:15
+    image: mariadb:10.11
     restart: always
     environment:
-      POSTGRES_USER: user_perro
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: proyectoperro
+      MARIADB_ROOT_PASSWORD: password_maestra
+      MARIADB_DATABASE: proyectoperro
+      MARIADB_USER: user_perro
+      MARIADB_PASSWORD: password123
     ports:
-      - "5432:5432"
+      - "3306:3306"
 
   app:
     build: .
@@ -16,4 +17,8 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql://user_perro:password123@db:5432/proyectoperro"
+      # El host sigue siendo "db" (el nombre del servicio arriba)
+      DB_HOST: db
+      DB_USER: user_perro
+      DB_PASS: password123
+      DB_NAME: proyectoperro
