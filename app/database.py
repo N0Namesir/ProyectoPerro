@@ -1,51 +1,134 @@
 import config
 
+# ─── LECTURA ────────────────────────────────────────────────────────────────
+
 def get_available_dogs():
+    """Retorna todos los perros que aún no han sido adoptados."""
     conn = config.get_db_connection()
+    if not conn: return []
     cur = conn.cursor()
     cur.execute("SELECT id, name, age, breed FROM Dog WHERE adopted = FALSE")
-    dogs_data = cur.fetchall()
+    dogs = cur.fetchall()
     conn.close()
-    return dogs_data
+    return dogs
+
+def get_all_dogs():
+    """Retorna todos los perros (para el panel de admin)."""
+    conn = config.get_db_connection()
+    if not conn: return []
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, age, breed, adopted FROM Dog ORDER BY id DESC")
+    dogs = cur.fetchall()
+    conn.close()
+    return dogs
 
 def get_dog_by_id(dog_id):
+    """Retorna un perro por su ID, o None si no existe."""
     conn = config.get_db_connection()
+    if not conn: return None
     cur = conn.cursor()
-    cur.execute("SELECT id, name, age, breed FROM Dog WHERE id = ?", (dog_id,))
-    dog_data = cur.fetchone()
+    cur.execute("SELECT id, name, age, breed, adopted FROM Dog WHERE id = ?", (dog_id,))
+    dog = cur.fetchone()
     conn.close()
-    return dog_data
+    return dog
+
+def get_all_adoptions():
+    """Retorna el historial de adopciones con datos del adoptante y el perro."""
+    conn = config.get_db_connection()
+    if not conn: return []
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT p.name, p.lastName, p.id_card, a.address, d.name, d.breed
+        FROM Person p
+        JOIN Adopter a ON p.id = a.person_id
+        JOIN Dog d ON d.adopted = TRUE
+        ORDER BY p.id DESC
+    """)
+    adoptions = cur.fetchall()
+    conn.close()
+    return adoptions
+
+# ─── ESCRITURA ───────────────────────────────────────────────────────────────
 
 def register_adoption_transactional(dog_id, adopter_name, adopter_lastname, address, id_card):
+    """
+    Ejecuta la adopción como una transacción atómica de 3 pasos:
+      1. INSERT Person
+      2. INSERT Adopter (hereda de Person)
+      3. UPDATE Dog → adopted = TRUE
+    Si cualquier paso falla, se revierte todo con rollback.
+    """
     conn = config.get_db_connection()
     if not conn: return False
-    
+
     cur = conn.cursor()
     try:
-        # Iniciar una transacción para asegurar integridad
         conn.autocommit = False
-        
-        # 1. Registrar a la Persona
-        sql_person = "INSERT INTO Person (name, lastName, id_card) VALUES (?, ?, ?)"
-        cur.execute(sql_person, (adopter_name, adopter_lastname, id_card))
+
+        cur.execute(
+            "INSERT INTO Person (name, lastName, id_card) VALUES (?, ?, ?)",
+            (adopter_name, adopter_lastname, id_card)
+        )
         person_id = cur.lastrowid
-        
-        # 2. Registrar al Adoptante (herencia de Person)
-        sql_adopter = "INSERT INTO Adopter (person_id, address) VALUES (?, ?)"
-        cur.execute(sql_adopter, (person_id, address))
-        
-        # 3. Actualizar el estado del perro
-        sql_dog = "UPDATE Dog SET adopted = TRUE WHERE id = ?"
-        cur.execute(sql_dog, (dog_id,))
-        
-        # Guardar todos los cambios
+
+        cur.execute(
+            "INSERT INTO Adopter (person_id, address) VALUES (?, ?)",
+            (person_id, address)
+        )
+
+        cur.execute(
+            "UPDATE Dog SET adopted = TRUE WHERE id = ?",
+            (dog_id,)
+        )
+
         conn.commit()
         return True
-        
+
     except Exception as e:
-        print(f"Error en la transacción de adopción: {e}")
-        # Revertir todo si algo sale mal
+        print(f"[ERROR] Transacción de adopción fallida: {e}")
         conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+def add_dog(name, age, breed):
+    """Inserta un nuevo perro en el catálogo."""
+    conn = config.get_db_connection()
+    if not conn: return False
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Dog (name, age, breed) VALUES (?, ?, ?)",
+            (name, int(age), breed)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"[ERROR] No se pudo agregar el perro: {e}")
+        return False
+    finally:
+        conn.close()
+
+def delete_dog(dog_id):
+    """
+    Elimina un perro solo si NO ha sido adoptado.
+    Retorna True si se eliminó, False si ya estaba adoptado o hubo error.
+    """
+    conn = config.get_db_connection()
+    if not conn: return False
+    cur = conn.cursor()
+    try:
+        # Verificar que no esté adoptado antes de eliminar
+        cur.execute("SELECT adopted FROM Dog WHERE id = ?", (dog_id,))
+        row = cur.fetchone()
+        if not row or row[0]:
+            return False
+
+        cur.execute("DELETE FROM Dog WHERE id = ?", (dog_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"[ERROR] No se pudo eliminar el perro: {e}")
         return False
     finally:
         conn.close()

@@ -1,36 +1,71 @@
-CREATE DATABASE IF NOT EXISTS CentroAdopcion;
-USE CentroAdopcion;
+"""
+setup_db.py — Inicializa la base de datos con las tablas y datos de prueba.
+Ejecutar UNA sola vez antes de arrancar la app:
 
--- Basado en la clase Person
-CREATE TABLE IF NOT EXISTS Person (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
-    lastName VARCHAR(100),
-    age INT,
-    dateOfBirth DATE,
-    id_card VARCHAR(20) UNIQUE, -- El 'ID: string' de tu diagrama
-    cel INT,
-    email VARCHAR(100)
-);
+    python setup_db.py
 
--- Basado en la clase Adopter, hereda de Person
-CREATE TABLE IF NOT EXISTS Adopter (
-    person_id INT PRIMARY KEY,
-    address VARCHAR(200),
-    FOREIGN KEY (person_id) REFERENCES Person(id)
-);
+Si las tablas ya existen, no las sobreescribe (IF NOT EXISTS).
+"""
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
 
--- Basado en las clases Pet y Dog
-CREATE TABLE IF NOT EXISTS Dog (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50),
-    age INT,
-    adopted BOOLEAN DEFAULT FALSE,
-    breed VARCHAR(50) -- Detalle específico de perro
-);
+import config
 
--- Insertamos los 3 perros en catálogo
-INSERT INTO Dog (name, age, breed) VALUES 
-('Firulais', 3, 'Labrador'),
-('Rex', 5, 'Pastor Alemán'),
-('Luna', 2, 'Husky');
+SQL_STATEMENTS = [
+    """
+    CREATE TABLE IF NOT EXISTS Person (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        name       VARCHAR(100),
+        lastName   VARCHAR(100),
+        age        INT,
+        dateOfBirth DATE,
+        id_card    VARCHAR(20) UNIQUE,
+        cel        BIGINT,
+        email      VARCHAR(100)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS Adopter (
+        person_id INT PRIMARY KEY,
+        address   VARCHAR(200),
+        FOREIGN KEY (person_id) REFERENCES Person(id)
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS Dog (
+        id      INT AUTO_INCREMENT PRIMARY KEY,
+        name    VARCHAR(50),
+        age     INT,
+        adopted BOOLEAN DEFAULT FALSE,
+        breed   VARCHAR(50)
+    )
+    """,
+    # Solo inserta los perros si la tabla estaba vacía
+    """
+    INSERT IGNORE INTO Dog (id, name, age, breed) VALUES
+        (1, 'Firulais', 3, 'Labrador'),
+        (2, 'Rex',      5, 'Pastor Alemán'),
+        (3, 'Luna',     2, 'Husky')
+    """
+]
+
+def run():
+    conn = config.get_db_connection()
+    if not conn:
+        print("[ERROR] No se pudo conectar. Revisa tu configuración en app/config.py")
+        sys.exit(1)
+
+    cur = conn.cursor()
+    for sql in SQL_STATEMENTS:
+        try:
+            cur.execute(sql)
+        except Exception as e:
+            print(f"[WARN] {e}")
+
+    conn.commit()
+    conn.close()
+    print("[OK] Base de datos inicializada correctamente.")
+
+if __name__ == '__main__':
+    run()

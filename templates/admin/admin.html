@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<h1>Panel de administración</h1>
+<h2>Gestión del catálogo y adopciones</h2>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; margin-top: 32px;">
+
+    <!-- Tabla de perros -->
+    <div>
+        <h3 style="font-family: monospace; font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Todos los perros ({{ dogs|length }})</h3>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Raza</th>
+                        <th>Edad</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dog in dogs %}
+                    <tr>
+                        <td style="font-family: monospace; color: var(--muted);">#{{ dog.id }}</td>
+                        <td style="font-weight: bold;">{{ dog.name }}</td>
+                        <td style="color: var(--muted);">{{ dog.breed }}</td>
+                        <td style="font-family: monospace;">{{ dog.age }}a</td>
+                        <td>
+                            {% if dog.adopted %}
+                            <span class="badge badge-adopted">adoptado</span>
+                            {% else %}
+                            <span class="badge badge-available">disponible</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not dog.adopted %}
+                            <form action="/admin/eliminar/{{ dog.id }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ dog.name }}?')">
+                                <button type="submit" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.8rem;">Eliminar</button>
+                            </form>
+                            {% else %}
+                            <span style="color: var(--muted); font-size: 0.8rem; font-family: monospace;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Historial de adopciones -->
+        {% if adoptions %}
+        <h3 style="font-family: monospace; font-size: 0.9rem; color: var(--muted); margin: 28px 0 12px; text-transform: uppercase; letter-spacing: 0.05em;">Historial de adopciones ({{ adoptions|length }})</h3>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Adoptante</th>
+                        <th>Cédula</th>
+                        <th>Dirección</th>
+                        <th>Perro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in adoptions %}
+                    <tr>
+                        <td>{{ a[0] }} {{ a[1] }}</td>
+                        <td style="font-family: monospace; font-size: 0.85rem; color: var(--muted);">{{ a[2] }}</td>
+                        <td style="color: var(--muted); font-size: 0.85rem;">{{ a[3] }}</td>
+                        <td><strong>{{ a[4] }}</strong> <span style="color: var(--muted); font-size: 0.8rem;">({{ a[5] }})</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Formulario para agregar perro -->
+    <div>
+        <h3 style="font-family: monospace; font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Agregar perro</h3>
+        <div class="card">
+            <form action="/admin/agregar_perro" method="POST">
+                <div class="field">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" name="name" required placeholder="Fido">
+                </div>
+                <div class="field">
+                    <label for="breed">Raza</label>
+                    <input type="text" id="breed" name="breed" required placeholder="Beagle">
+                </div>
+                <div class="field">
+                    <label for="age">Edad (años)</label>
+                    <input type="number" id="age" name="age" required min="0" max="25" placeholder="2">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                    Agregar al catálogo
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
